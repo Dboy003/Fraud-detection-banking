@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data files (trop lourds pour GitHub)
+data/
+*.csv
+models/*.pkl
+models/*.json
