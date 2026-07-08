@@ -1,17 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
+from prometheus_fastapi_instrumentator import Instrumentator
 import uuid
 import time
 
 from schemas import TransactionInput, PredictionOutput, HealthResponse
-from predictor import predictor
+from predictor import predictor, API_ERRORS
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Chargement du modèle et connexion Redis au démarrage."""
     predictor.load_model()
-    predictor.connect_redis()
+    predictor.connect_redis()  # Plus de paramètres — lit depuis env vars
     yield
     print("API arrêtée")
 
@@ -20,7 +20,7 @@ app = FastAPI(
     title="🔒 Fraud Detection API",
     description="""
     API de détection de fraude bancaire en temps réel.
-    
+
     - **Modèle** : XGBoost + SMOTE
     - **Seuil optimal** : 0.96
     - **Cache** : Redis (TTL 1h)
@@ -30,10 +30,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Instrumentation automatique Prometheus
+# Expose /metrics avec métriques HTTP standard (requêtes, latence, erreurs)
+Instrumentator().instrument(app).expose(app)
+
 
 @app.get("/health", response_model=HealthResponse, tags=["Monitoring"])
 async def health_check():
-    """Vérifie l'état de l'API, du modèle et de Redis."""
     return HealthResponse(
         status="healthy",
         model_loaded=predictor.model is not None,
@@ -44,34 +47,23 @@ async def health_check():
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Prediction"])
 async def predict_fraud(transaction: TransactionInput):
-    """
-    Prédit si une transaction bancaire est frauduleuse.
-    
-    Retourne la probabilité de fraude, le niveau de risque,
-    et indique si la réponse provient du cache Redis.
-    """
     if predictor.model is None:
+        API_ERRORS.labels(error_type='model_not_loaded').inc()
         raise HTTPException(
             status_code=503,
             detail="Modèle non chargé — API non prête"
         )
 
-    # Génération d'un ID unique pour la transaction
     transaction_id = str(uuid.uuid4())
 
-    # Prédiction
-    start_time = time.time()
-    result = predictor.predict(
-        transaction.model_dump(),
-        transaction_id
-    )
-    latency_ms = (time.time() - start_time) * 1000
-
-    print(f"[{transaction_id[:8]}] "
-          f"Fraude: {result['is_fraud']} | "
-          f"Prob: {result['fraud_probability']:.4f} | "
-          f"Latence: {latency_ms:.1f}ms | "
-          f"Cache: {result['cached']}")
+    try:
+        result = predictor.predict(
+            transaction.model_dump(),
+            transaction_id
+        )
+    except Exception as e:
+        API_ERRORS.labels(error_type='prediction_error').inc()
+        raise HTTPException(status_code=500, detail=str(e))
 
     return PredictionOutput(**result)
 
@@ -81,5 +73,6 @@ async def root():
     return {
         "message": "Fraud Detection API",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "metrics": "/metrics"
     }
