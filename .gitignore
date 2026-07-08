@@ -221,4 +221,3 @@ __marimo__/
 data/
 *.csv
 models/*.pkl
-models/*.json

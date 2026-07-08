@@ -1,0 +1,139 @@
+{
+  "title": "Fraud Detection — MLOps Dashboard",
+  "tags": ["fraud", "mlops", "fastapi"],
+  "timezone": "browser",
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Prédictions",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "sum(fraud_predictions_total)",
+        "instant": true
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Taux de Fraude (100 dernières transactions)",
+      "type": "gauge",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 1,
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": 0},
+              {"color": "yellow", "value": 0.01},
+              {"color": "red", "value": 0.05}
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "fraud_rate_current",
+        "instant": true
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Cache Hit Rate Redis",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.3},
+              {"color": "green", "value": 0.7}
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "rate(fraud_cache_hits_total[5m]) / (rate(fraud_cache_hits_total[5m]) + rate(fraud_cache_misses_total[5m]))",
+        "instant": true
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Score de Confiance Moyen",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.5},
+              {"color": "green", "value": 0.8}
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "fraud_prediction_confidence_mean",
+        "instant": true
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Latence des Prédictions (p50 / p95 / p99)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "fieldConfig": {
+        "defaults": {"unit": "s"}
+      },
+      "targets": [
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "histogram_quantile(0.50, rate(fraud_prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "histogram_quantile(0.95, rate(fraud_prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "histogram_quantile(0.99, rate(fraud_prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Distribution par Niveau de Risque",
+      "type": "barchart",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "fraud_risk_level_total",
+        "instant": true,
+        "legendFormat": "{{level}}"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "Distribution des Scores de Fraude (Data Drift)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+      "targets": [{
+        "datasource": {"type": "prometheus"},
+        "expr": "rate(fraud_probability_distribution_bucket[5m])",
+        "legendFormat": "bucket {{le}}"
+      }]
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}

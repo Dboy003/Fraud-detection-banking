@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s      # Collecte les métriques toutes les 15 secondes
+  evaluation_interval: 15s  # Évalue les règles d'alerte toutes les 15s
+
+scrape_configs:
+  - job_name: 'fraud-detection-api'
+    static_configs:
+      - targets: ['api:8000']    # 'api' = nom du service dans Docker Compose
+    metrics_path: '/metrics'

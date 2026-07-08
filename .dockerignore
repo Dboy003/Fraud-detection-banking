@@ -1,0 +1,34 @@
+# Environnement virtuel Python
+venv/
+
+# Notebooks et exploration
+notebooks/
+
+# Données (trop lourdes + non nécessaires pour l'API)
+data/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Git
+.git/
+.gitignore
+
+# Fichiers de développement
+*.ipynb
+.ipynb_checkpoints/
+
+# Tests
+tests/
+
+# Documentation
+*.md
+README*
+
+# OS
+.DS_Store
+Thumbs.db
