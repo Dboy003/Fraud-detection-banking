@@ -220,4 +220,3 @@ __marimo__/
 # Data files (trop lourds pour GitHub)
 data/
 *.csv
-models/*.pkl
