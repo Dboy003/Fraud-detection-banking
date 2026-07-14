@@ -106,18 +106,27 @@ class FraudPredictor:
         print(f"Modèle chargé — seuil optimal : {self.threshold}")
 
     def connect_redis(self):
-        """Connexion à Redis — host lu depuis variable d'environnement."""
+        """Connexion à Redis — paramètres lus depuis variables d'environnement.
+
+        Compatible Redis local (Docker Compose, sans mot de passe/TLS)
+        et Upstash Redis (mot de passe + TLS obligatoires).
+        """
         host = os.getenv('REDIS_HOST', 'localhost')
         port = int(os.getenv('REDIS_PORT', 6379))
+        password = os.getenv('REDIS_PASSWORD', None)
+        use_ssl = os.getenv('REDIS_SSL', 'false').lower() == 'true'
+
         try:
             self.redis_client = redis.Redis(
                 host=host, port=port, db=0,
-                socket_connect_timeout=2,
+                password=password,
+                ssl=use_ssl,
+                socket_connect_timeout=5,
                 decode_responses=True
             )
             self.redis_client.ping()
             self.redis_available = True
-            print(f"Redis connecté — {host}:{port}")
+            print(f"Redis connecté — {host}:{port} (SSL={use_ssl})")
         except Exception as e:
             self.redis_available = False
             print(f"Redis indisponible — mode sans cache : {e}")
