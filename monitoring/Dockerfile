@@ -2,7 +2,7 @@
 FROM prom/prometheus:latest
 
 # Config dédiée au cloud (scrape Render + remote_write Grafana Cloud)
-COPY monitoring/prometheus.cloud.yml /etc/prometheus/prometheus.yml
+COPY prometheus.cloud.yml /etc/prometheus/prometheus.yml
 
 # Forme shell nécessaire pour que ${PORT} soit interprété à l'exécution 
 ENTRYPOINT ["sh", "-c"]
