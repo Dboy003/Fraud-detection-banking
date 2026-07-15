@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# ─── Scrape : l'API FastAPI déployée sur Render ────────────────────────────
+scrape_configs:
+  - job_name: 'fraud-detection-api-render'
+    scheme: https                             # l'API Render est en HTTPS (pas de :port dans l'URL publique)
+    static_configs:
+      - targets: ['fraud-detection-banking-x3s8.onrender.com']
+    metrics_path: '/metrics'
+
+# ─── Remote write : envoi vers Grafana Cloud ───────────────────────────────
+remote_write:
+  - url: https://prometheus-prod-65-prod-eu-west-2.grafana.net/api/prom/push
+    basic_auth:
+      username: '3370366'
+      password_file: /etc/secrets/grafana_token   # injecté via "Secret Files" sur Render — jamais commité

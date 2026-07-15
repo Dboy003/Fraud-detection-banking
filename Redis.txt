@@ -1,0 +1,11 @@
+Endpoint : 
+TCP :rediss://default:gQAAAAAAAnVuAAIgcDI3ZGVjMDllNTAyY2E0Y2JlOTE2ZWRiZTFkNzdjMGFmNQ@destined-bream-161134.upstash.io:6379
+
+HTTPS : https://destined-bream-161134.upstash.io
+
+Port : 6379
+
+
+
+
+
