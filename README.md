@@ -58,6 +58,8 @@ Modèle : **XGBoost + SMOTE** (rééquilibrage de classe), seuil de décision **
 
 > Le F2-Score (qui pondère le Recall 2× plus que la Precision) a été choisi comme métrique d'optimisation principale car il est cohérent avec l'enjeu métier : mieux vaut quelques fausses alertes qu'une fraude non détectée.
 
+![Matrice de confusion](docs/screenshots/confusion-matrix.png)
+
 **Feature engineering** (voir [`notebooks/02_feature_engineering.ipynb`](notebooks/02_feature_engineering.ipynb)) : 7 features dérivées créées à partir de `Time` et `Amount` : encodage cyclique de l'heure (`sin_hour`/`cos_hour`), indicateur nuit (`is_night`), log-transformation et normalisation du montant, et une feature d'interaction montant × nuit.
 
 Notebooks complets : [EDA](notebooks/01_EDA.ipynb) · [Feature Engineering](notebooks/02_feature_engineering.ipynb) · [Modeling](notebooks/03_modeling.ipynb)
@@ -103,6 +105,9 @@ Notebooks complets : [EDA](notebooks/01_EDA.ipynb) · [Feature Engineering](note
 
 **Dashboard MLOps (Grafana Cloud)**
 ![Dashboard Grafana](docs/screenshots/grafana-dashboard.png)
+
+**Monitoring d'uptime (UptimeRobot)**
+![UptimeRobot](docs/screenshots/uptimerobot.png)
 
 ---
 
